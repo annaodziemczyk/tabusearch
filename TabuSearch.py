@@ -6,12 +6,14 @@ class TabuSearch:
     bestCandidate = []
     maxTabuSize = 0
     noOfIterations = 0
+    noOfMachines = 1
 
-    def __init__(self, jobs, bestcandidate, maxtabusize, iterations):
+    def __init__(self, jobs, bestcandidate, maxtabusize, machines, iterations):
         self.jobs = jobs
         self.bestCandidate = bestcandidate
         self.maxTabuSize = maxtabusize
         self.noOfIterations = iterations
+        self.noOfMachines = machines
 
     def start(self):
         bestSolution = self.bestCandidate
@@ -19,7 +21,9 @@ class TabuSearch:
         tabuList = []
         tabuList.append(self.bestCandidate)
 
+        #stopping condition for the search is the specified number of interations
         for iterationCount in range(0, self.noOfIterations):
+            #minimizing tardiness by trying to find a neighbour that is less tardy that the current best solution
             neighborhood = self.findNeighbours(self.bestCandidate)
             for candidate in neighborhood:
                 if (candidate not in tabuList) and (self.averageTardiness(candidate) < self.averageTardiness(self.bestCandidate)):
@@ -30,12 +34,13 @@ class TabuSearch:
                 print("Current best solution: " + str(bestSolution) + "(" + str(self.averageTardiness(bestSolution)) + ")")
 
             tabuList.append(self.bestCandidate)
+            #making sure we keep in memory only search list of the specified size
             if len(tabuList) > self.maxTabuSize:
                 del tabuList[0]
 
         return bestSolution
 
-
+    #we're finding neighbours through adajent pairwaise interchanges
     def findNeighbours(self, items):
         neighbours = []
         for index in range(0, len(items)-1):
@@ -43,6 +48,7 @@ class TabuSearch:
 
         return neighbours
 
+    #swap adajent items in find new neighbour
     def swap(self, list, pos1, pos2):
         list[pos1], list[pos2] = list[pos2], list[pos1]
         return list
@@ -50,10 +56,15 @@ class TabuSearch:
     def averageTardiness(self, candidatesolution):
         avgTardiness = 0
         starttime = 0
+        #calculate tardiness for each job in the candidate solution
         for jobName in candidatesolution:
             job = self.jobs[str(jobName)]
-            completionTime = starttime + job.processingTime
+            # the job is complete after it finishes executing on last machine
+            # the job cannot start on next machine until it finishes execution on previous machine
+            # resulting in increased processing time
+            completionTime = starttime + self.noOfMachines*job.processingTime
             tardiness = completionTime - job.dueTime
+            #if job is tardy, apply penality
             if tardiness > 0:
                 avgTardiness += tardiness * job.penality
             starttime = completionTime
@@ -86,7 +97,7 @@ if __name__ == "__main__":
         "4":Job(str(4), 3, 28, 12)
     }
 
-    search = TabuSearch(jobs, [3, 1, 4, 2], 2, 2000)
+    search = TabuSearch(jobs, [3, 1, 4, 2], 2, 3, 2000)
     bestSolution = search.start()
     print("Current best solution: " + str(bestSolution))
 
