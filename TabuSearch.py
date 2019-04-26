@@ -54,7 +54,7 @@ class TabuSearch:
         return list
 
     def weightedTardiness(self, candidatesolution):
-        avgTardiness = 0
+        weightedTardiness = 0
         starttime = 0
         #calculate tardiness for each job in the candidate solution
         for jobName in candidatesolution:
@@ -66,10 +66,10 @@ class TabuSearch:
             tardiness = completionTime - job.dueTime
             #if job is tardy, apply penality
             if tardiness > 0:
-                avgTardiness += tardiness * job.penality
+                weightedTardiness += tardiness * job.penality
             starttime = starttime + job.processingTime
 
-        return avgTardiness
+        return weightedTardiness
 
 
 class Job:
