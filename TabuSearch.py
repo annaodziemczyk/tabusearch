@@ -17,7 +17,7 @@ class TabuSearch:
 
     def start(self):
         bestSolution = self.bestCandidate
-        print("Current best solution: " + str(bestSolution) + "(" + str(self.averageTardiness(bestSolution)) + ")")
+        print("Current best solution: " + str(bestSolution) + "(" + str(self.weightedTardiness(bestSolution)) + ")")
         tabuList = []
         tabuList.append(self.bestCandidate)
 
@@ -26,12 +26,12 @@ class TabuSearch:
             #minimizing tardiness by trying to find a neighbour that is less tardy that the current best solution
             neighborhood = self.findNeighbours(self.bestCandidate)
             for candidate in neighborhood:
-                if (candidate not in tabuList) and (self.averageTardiness(candidate) < self.averageTardiness(self.bestCandidate)):
+                if (candidate not in tabuList) and (self.weightedTardiness(candidate) < self.weightedTardiness(self.bestCandidate)):
                     self.bestCandidate = candidate
 
-            if self.averageTardiness(self.bestCandidate) < self.averageTardiness(bestSolution):
+            if self.weightedTardiness(self.bestCandidate) < self.weightedTardiness(bestSolution):
                 bestSolution = self.bestCandidate
-                print("Current best solution: " + str(bestSolution) + "(" + str(self.averageTardiness(bestSolution)) + ")")
+                print("Current best solution: " + str(bestSolution) + "(" + str(self.weightedTardiness(bestSolution)) + ")")
 
             tabuList.append(self.bestCandidate)
             #making sure we keep in memory only search list of the specified size
@@ -53,7 +53,7 @@ class TabuSearch:
         list[pos1], list[pos2] = list[pos2], list[pos1]
         return list
 
-    def averageTardiness(self, candidatesolution):
+    def weightedTardiness(self, candidatesolution):
         avgTardiness = 0
         starttime = 0
         #calculate tardiness for each job in the candidate solution
@@ -67,7 +67,7 @@ class TabuSearch:
             #if job is tardy, apply penality
             if tardiness > 0:
                 avgTardiness += tardiness * job.penality
-            starttime = completionTime
+            starttime = starttime + job.processingTime
 
         return avgTardiness
 
